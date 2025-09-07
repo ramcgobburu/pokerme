@@ -1,0 +1,166 @@
+'use client'
+
+import { useState } from 'react'
+import { GameState, CardColor, Suit, CardValue, Card } from '@/types/poker'
+import ColorSelection from './ColorSelection'
+import SuitSelection from './SuitSelection'
+import ValueSelection from './ValueSelection'
+import CardDisplay from './CardDisplay'
+import GamePhase from './GamePhase'
+import AnalysisDisplay from './AnalysisDisplay'
+
+const initialGameState: GameState = {
+  phase: 'color-selection',
+  selectedColor: null,
+  selectedSuit: null,
+  selectedValue: null,
+  holeCards: [],
+  communityCards: [],
+  currentCardIndex: 0
+}
+
+export default function PokerGame() {
+  const [gameState, setGameState] = useState<GameState>(initialGameState)
+
+  const handleColorSelect = (color: CardColor) => {
+    setGameState(prev => ({
+      ...prev,
+      selectedColor: color,
+      phase: 'suit-selection'
+    }))
+  }
+
+  const handleSuitSelect = (suit: Suit) => {
+    setGameState(prev => ({
+      ...prev,
+      selectedSuit: suit,
+      phase: 'value-selection'
+    }))
+  }
+
+  const handleValueSelect = (value: CardValue) => {
+    const newCard: Card = {
+      suit: gameState.selectedSuit!,
+      value,
+      color: gameState.selectedColor!
+    }
+
+    const newHoleCards = [...gameState.holeCards, newCard]
+    const isLastHoleCard = newHoleCards.length === 2
+
+    setGameState(prev => ({
+      ...prev,
+      holeCards: newHoleCards,
+      phase: isLastHoleCard ? 'hole-cards-complete' : 'color-selection',
+      selectedColor: null,
+      selectedSuit: null,
+      selectedValue: null,
+      currentCardIndex: isLastHoleCard ? 0 : prev.currentCardIndex + 1
+    }))
+  }
+
+  const handleNextPhase = () => {
+    setGameState(prev => {
+      switch (prev.phase) {
+        case 'hole-cards-complete':
+          return { ...prev, phase: 'flop' }
+        case 'flop':
+          return { ...prev, phase: 'turn' }
+        case 'turn':
+          return { ...prev, phase: 'river' }
+        case 'river':
+          return { ...prev, phase: 'analysis' }
+        default:
+          return prev
+      }
+    })
+  }
+
+  const handleReset = () => {
+    setGameState(initialGameState)
+  }
+
+  const renderCurrentPhase = () => {
+    switch (gameState.phase) {
+      case 'color-selection':
+        return <ColorSelection onColorSelect={handleColorSelect} />
+      
+      case 'suit-selection':
+        return (
+          <SuitSelection 
+            color={gameState.selectedColor!} 
+            onSuitSelect={handleSuitSelect}
+            onBack={() => setGameState(prev => ({ ...prev, phase: 'color-selection', selectedColor: null }))}
+          />
+        )
+      
+      case 'value-selection':
+        return (
+          <ValueSelection 
+            suit={gameState.selectedSuit!}
+            color={gameState.selectedColor!}
+            onValueSelect={handleValueSelect}
+            onBack={() => setGameState(prev => ({ ...prev, phase: 'suit-selection', selectedSuit: null }))}
+          />
+        )
+      
+      case 'hole-cards-complete':
+        return (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Your Hole Cards</h2>
+            <div className="flex justify-center gap-4 mb-6">
+              {gameState.holeCards.map((card, index) => (
+                <CardDisplay key={index} card={card} />
+              ))}
+            </div>
+            <button 
+              onClick={handleNextPhase}
+              className="poker-button"
+            >
+              Continue to Flop
+            </button>
+          </div>
+        )
+      
+      case 'flop':
+      case 'turn':
+      case 'river':
+        return (
+          <GamePhase 
+            phase={gameState.phase}
+            holeCards={gameState.holeCards}
+            communityCards={gameState.communityCards}
+            onCardAdd={(card) => setGameState(prev => ({
+              ...prev,
+              communityCards: [...prev.communityCards, card],
+              phase: prev.phase === 'flop' && prev.communityCards.length === 2 ? 'turn' :
+                    prev.phase === 'turn' && prev.communityCards.length === 3 ? 'river' :
+                    prev.phase === 'river' && prev.communityCards.length === 4 ? 'analysis' : prev.phase
+            }))}
+            onNextPhase={handleNextPhase}
+            onReset={handleReset}
+          />
+        )
+      
+      case 'analysis':
+        return (
+          <AnalysisDisplay 
+            holeCards={gameState.holeCards}
+            communityCards={gameState.communityCards}
+            onReset={handleReset}
+          />
+        )
+      
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-2xl">
+        {renderCurrentPhase()}
+      </div>
+    </div>
+  )
+}

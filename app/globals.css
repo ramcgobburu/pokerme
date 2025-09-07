@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-poker-green to-green-800 min-h-screen;
+    font-family: 'poker', serif;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-lg border-2 border-gray-200 p-4 text-center;
+    width: 80px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .card-red {
+    @apply text-poker-red;
+  }
+  
+  .card-black {
+    @apply text-poker-black;
+  }
+  
+  .card-suit {
+    @apply text-2xl font-bold;
+  }
+  
+  .card-number {
+    @apply text-lg font-bold;
+  }
+  
+  .poker-button {
+    @apply bg-poker-gold hover:bg-yellow-400 text-poker-black font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+  }
+  
+  .poker-button-red {
+    @apply bg-poker-red hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+  }
+  
+  .poker-button-black {
+    @apply bg-poker-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+  }
+}
