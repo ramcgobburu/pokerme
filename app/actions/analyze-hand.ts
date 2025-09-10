@@ -5,9 +5,14 @@ import { analyzePokerHand } from '@/lib/openai'
 import { evaluateHandStrength, convertCardToEvaluatorFormat } from '@/lib/poker-evaluator'
 
 export async function analyzeHandAction(holeCards: Card[], communityCards: Card[]) {
+  console.log('🚀 Starting analyzeHandAction...')
+  console.log('📊 Input - Hole Cards:', holeCards)
+  console.log('📊 Input - Community Cards:', communityCards)
+  
   try {
     // Validate input
     if (!holeCards || holeCards.length < 2) {
+      console.log('❌ Validation failed: Not enough hole cards')
       return {
         success: false,
         error: 'At least 2 hole cards are required for analysis'
@@ -15,6 +20,7 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
     }
 
     if (holeCards.length > 2) {
+      console.log('❌ Validation failed: Too many hole cards')
       return {
         success: false,
         error: 'Maximum 2 hole cards allowed'
@@ -22,6 +28,7 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
     }
 
     if (communityCards && communityCards.length > 5) {
+      console.log('❌ Validation failed: Too many community cards')
       return {
         success: false,
         error: 'Maximum 5 community cards allowed'
@@ -31,14 +38,19 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
     // Convert cards to string format for AI analysis
     const holeCardsStr = holeCards.map(convertCardToEvaluatorFormat)
     const communityCardsStr = communityCards.map(convertCardToEvaluatorFormat)
+    console.log('🔄 Converted cards - Hole:', holeCardsStr, 'Community:', communityCardsStr)
     
     // Get basic hand evaluation first
+    console.log('📊 Getting basic hand evaluation...')
     const handEvaluation = evaluateHandStrength(holeCards, communityCards)
+    console.log('📊 Basic evaluation result:', handEvaluation)
     
     // Try to get AI analysis, fallback to basic evaluation if API fails
     let aiAnalysis
     try {
+      console.log('🤖 Attempting AI analysis...')
       aiAnalysis = await analyzePokerHand(holeCardsStr, communityCardsStr)
+      console.log('✅ AI analysis successful:', aiAnalysis)
       
       // Validate AI response
       if (!aiAnalysis || typeof aiAnalysis !== 'object') {
@@ -51,7 +63,13 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
       }
       
     } catch (error) {
-      console.warn('AI analysis failed, using basic evaluation:', error)
+      console.warn('⚠️ AI analysis failed, using basic evaluation:', error)
+      console.warn('⚠️ Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
+      
       // Fallback to basic evaluation
       aiAnalysis = {
         handStrength: handEvaluation.handStrength,
@@ -60,9 +78,10 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
         winProbability: handEvaluation.winProbability,
         reasoning: `Based on hand strength analysis: ${handEvaluation.handStrength}. This is a basic evaluation without AI enhancement.`
       }
+      console.log('🔄 Using fallback analysis:', aiAnalysis)
     }
     
-    return {
+    const finalResult = {
       success: true,
       analysis: {
         handStrength: aiAnalysis.handStrength || 'Unknown',
@@ -72,8 +91,11 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
         reasoning: aiAnalysis.reasoning || 'Analysis completed with basic evaluation.'
       }
     }
+    
+    console.log('✅ Final result:', finalResult)
+    return finalResult
   } catch (error) {
-    console.error('Error in analyzeHandAction:', error)
+    console.error('❌ Error in analyzeHandAction:', error)
     return {
       success: false,
       error: 'An unexpected error occurred while analyzing the hand. Please try again.'

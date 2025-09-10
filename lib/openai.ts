@@ -5,6 +5,12 @@ const openai = new OpenAI({
 })
 
 export async function analyzePokerHand(holeCards: string[], communityCards: string[]) {
+  console.log('🎯 Starting AI analysis...')
+  console.log('📊 Hole Cards:', holeCards)
+  console.log('📊 Community Cards:', communityCards)
+  console.log('🔑 API Key exists:', !!process.env.OPENAI_API_KEY)
+  console.log('🔑 API Key length:', process.env.OPENAI_API_KEY?.length || 0)
+  
   try {
     const prompt = `You are an expert poker analyst. Analyze this poker hand and provide a detailed assessment.
 
@@ -27,6 +33,9 @@ Format your response as JSON:
   "reasoning": "string"
 }`
 
+    console.log('📝 Sending request to OpenAI...')
+    console.log('🤖 Model: gpt-4o-mini')
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Free GPT-4 model
       messages: [
@@ -43,14 +52,33 @@ Format your response as JSON:
       max_tokens: 600
     })
 
+    console.log('✅ OpenAI response received')
+    console.log('📄 Response object:', completion)
+    
     const response = completion.choices[0]?.message?.content
+    console.log('📄 Response content:', response)
+    
     if (!response) {
+      console.error('❌ No response content from OpenAI')
       throw new Error('No response from OpenAI')
     }
 
-    return JSON.parse(response)
+    console.log('🔄 Parsing JSON response...')
+    const parsedResponse = JSON.parse(response)
+    console.log('✅ Successfully parsed AI response:', parsedResponse)
+    
+    return parsedResponse
   } catch (error) {
-    console.error('Error analyzing poker hand:', error)
+    console.error('❌ AI Analysis Error Details:')
+    console.error('Error type:', error.constructor.name)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+    
+    if (error.response) {
+      console.error('API Response status:', error.response.status)
+      console.error('API Response data:', error.response.data)
+    }
+    
     throw new Error('Failed to analyze poker hand')
   }
 }
