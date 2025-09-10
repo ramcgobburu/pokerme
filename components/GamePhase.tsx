@@ -110,6 +110,7 @@ export default function GamePhase({ phase, holeCards, communityCards, onCardAdd,
       <ValueSelection 
         suit={currentSelection.suit}
         color={currentSelection.color}
+        cardNumber={communityCards.length + 1}
         onValueSelect={handleValueSelect}
         onBack={() => setCurrentSelection(prev => ({ ...prev, suit: null }))}
       />
