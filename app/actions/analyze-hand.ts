@@ -65,9 +65,9 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
     } catch (error) {
       console.warn('⚠️ AI analysis failed, using basic evaluation:', error)
       console.warn('⚠️ Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
       })
       
       // Fallback to basic evaluation
@@ -96,6 +96,11 @@ export async function analyzeHandAction(holeCards: Card[], communityCards: Card[
     return finalResult
   } catch (error) {
     console.error('❌ Error in analyzeHandAction:', error)
+    console.error('❌ Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return {
       success: false,
       error: 'An unexpected error occurred while analyzing the hand. Please try again.'

@@ -70,13 +70,14 @@ Format your response as JSON:
     return parsedResponse
   } catch (error) {
     console.error('❌ AI Analysis Error Details:')
-    console.error('Error type:', error.constructor.name)
-    console.error('Error message:', error.message)
-    console.error('Error stack:', error.stack)
+    console.error('Error type:', error instanceof Error ? error.constructor.name : 'Unknown')
+    console.error('Error message:', error instanceof Error ? error.message : String(error))
+    console.error('Error stack:', error instanceof Error ? error.stack : undefined)
     
-    if (error.response) {
-      console.error('API Response status:', error.response.status)
-      console.error('API Response data:', error.response.data)
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as any
+      console.error('API Response status:', apiError.response?.status)
+      console.error('API Response data:', apiError.response?.data)
     }
     
     throw new Error('Failed to analyze poker hand')
