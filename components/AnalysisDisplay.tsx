@@ -38,10 +38,14 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
         
         const result = await analyzeHandAction(holeCards, communityCards)
         
-        if (result.success && result.analysis) {
-          setAnalysis(result.analysis)
+        if (result.success) {
+          // Type guard: if success is true, result must have analysis property
+          const successResult = result as { success: true; analysis: HandAnalysis }
+          setAnalysis(successResult.analysis)
         } else {
-          setError(result.error || 'Failed to analyze hand. Please try again.')
+          // Type guard: if success is false, result must have error property
+          const errorResult = result as { success: false; error: string }
+          setError(errorResult.error || 'Failed to analyze hand. Please try again.')
         }
       } catch (err) {
         console.error('Error analyzing hand:', err)
