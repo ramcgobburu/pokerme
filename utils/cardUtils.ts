@@ -32,3 +32,24 @@ export const getCardsByColor = (color: CardColor): Suit[] => {
     .filter(([_, data]) => data.color === color)
     .map(([suit, _]) => suit as Suit)
 }
+
+export const isCardDuplicate = (newCard: Card, existingCards: Card[]): boolean => {
+  return existingCards.some(card => 
+    card.suit === newCard.suit && card.value === newCard.value
+  )
+}
+
+export const getAvailableCards = (allCards: Card[]): Card[] => {
+  const availableCards: Card[] = []
+  
+  for (const suit of Object.keys(SUITS) as Suit[]) {
+    for (const value of CARD_VALUES) {
+      const card = createCard(suit, value)
+      if (!isCardDuplicate(card, allCards)) {
+        availableCards.push(card)
+      }
+    }
+  }
+  
+  return availableCards
+}

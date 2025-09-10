@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { Card, CardColor, Suit, CardValue, GamePhase as PhaseType } from '@/types/poker'
+import { isCardDuplicate } from '@/utils/cardUtils'
+import { useToast } from './ToastProvider'
 import ColorSelection from './ColorSelection'
 import SuitSelection from './SuitSelection'
 import ValueSelection from './ValueSelection'
@@ -17,6 +19,7 @@ interface GamePhaseProps {
 }
 
 export default function GamePhase({ phase, holeCards, communityCards, onCardAdd, onNextPhase, onReset }: GamePhaseProps) {
+  const { showToast } = useToast()
   const [currentSelection, setCurrentSelection] = useState<{
     color: CardColor | null
     suit: Suit | null
@@ -42,6 +45,14 @@ export default function GamePhase({ phase, holeCards, communityCards, onCardAdd,
         value,
         color: currentSelection.color
       }
+      
+      // Check for duplicate cards
+      const allExistingCards = [...holeCards, ...communityCards]
+      if (isCardDuplicate(newCard, allExistingCards)) {
+        showToast('This card has already been selected. Please choose a different card.', 'warning')
+        return
+      }
+      
       onCardAdd(newCard)
       setCurrentSelection({ color: null, suit: null, value: null })
     }
@@ -49,18 +60,18 @@ export default function GamePhase({ phase, holeCards, communityCards, onCardAdd,
 
   const getPhaseTitle = () => {
     switch (phase) {
-      case 'flop': return 'Flop - Select 3 Community Cards'
-      case 'turn': return 'Turn - Select 1 Community Card'
-      case 'river': return 'River - Select 1 Community Card'
+      case 'flop': return `Flop - Select 3 Community Cards (${communityCards.length}/3)`
+      case 'turn': return `Turn - Select 1 More Community Card (${communityCards.length}/4 total)`
+      case 'river': return `River - Select Final Community Card (${communityCards.length}/5 total)`
       default: return 'Community Cards'
     }
   }
 
   const getRequiredCards = () => {
     switch (phase) {
-      case 'flop': return 3
-      case 'turn': return 1
-      case 'river': return 1
+      case 'flop': return 3  // Need 3 cards for flop
+      case 'turn': return 4  // Need 4 cards total (3 flop + 1 turn)
+      case 'river': return 5 // Need 5 cards total (3 flop + 1 turn + 1 river)
       default: return 0
     }
   }
@@ -72,9 +83,11 @@ export default function GamePhase({ phase, holeCards, communityCards, onCardAdd,
     if (cardsNeeded <= 0) {
       return (
         <div className="text-center">
-          <button onClick={onNextPhase} className="poker-button text-xl px-8 py-4">
-            Continue to {phase === 'flop' ? 'Turn' : phase === 'turn' ? 'River' : 'Analysis'}
-          </button>
+          <div className="text-green-200 text-lg mb-4">
+            {phase === 'flop' ? 'Flop complete! Moving to Turn...' : 
+             phase === 'turn' ? 'Turn complete! Moving to River...' : 
+             'River complete! Analyzing hand...'}
+          </div>
         </div>
       )
     }

@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Card } from '@/types/poker'
 import { getSuitSymbol, getCardDisplayValue } from '@/utils/cardUtils'
 
@@ -8,7 +9,7 @@ interface CardDisplayProps {
   size?: 'small' | 'medium' | 'large'
 }
 
-export default function CardDisplay({ card, size = 'medium' }: CardDisplayProps) {
+const CardDisplay = memo(function CardDisplay({ card, size = 'medium' }: CardDisplayProps) {
   const sizeClasses = {
     small: 'w-12 h-16 text-xs',
     medium: 'w-20 h-28 text-sm',
@@ -16,9 +17,11 @@ export default function CardDisplay({ card, size = 'medium' }: CardDisplayProps)
   }
 
   return (
-    <div className={`card ${card.color === 'red' ? 'card-red' : 'card-black'} ${sizeClasses[size]}`}>
-      <div className="card-suit text-2xl">{getSuitSymbol(card.suit)}</div>
-      <div className="card-number text-lg font-bold">{getCardDisplayValue(card.value)}</div>
+    <div className={`card ${card.color} ${sizeClasses[size]}`}>
+      <div className="text-2xl">{getSuitSymbol(card.suit)}</div>
+      <div className="text-lg font-bold">{getCardDisplayValue(card.value)}</div>
     </div>
   )
-}
+})
+
+export default CardDisplay

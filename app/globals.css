@@ -2,50 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-gradient-to-br from-poker-green to-green-800 min-h-screen;
-    font-family: 'poker', serif;
+/* Custom poker button styles */
+.poker-button {
+  @apply bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+}
+
+.poker-button-red {
+  @apply bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+}
+
+.poker-button-black {
+  @apply bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+}
+
+/* Card styles */
+.card {
+  @apply w-16 h-24 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center text-2xl font-bold border-2 border-gray-300;
+  min-width: 4rem;
+  min-height: 6rem;
+}
+
+.card.red {
+  @apply text-red-600;
+}
+
+.card.black {
+  @apply text-gray-800;
+}
+
+/* Suit selection buttons */
+.suit-button {
+  @apply w-20 h-20 rounded-full flex items-center justify-center text-4xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-110;
+}
+
+.suit-button.red {
+  @apply bg-red-100 hover:bg-red-200 text-red-600 border-2 border-red-300;
+}
+
+.suit-button.black {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-800 border-2 border-gray-300;
+}
+
+/* Value selection grid */
+.value-grid {
+  @apply grid grid-cols-4 gap-3 max-w-md mx-auto;
+}
+
+.value-button {
+  @apply w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105;
+}
+
+.value-button.red {
+  @apply bg-red-100 hover:bg-red-200 text-red-600 border border-red-300;
+}
+
+.value-button.black {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@layer components {
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Glassmorphism effect */
+.glass {
+  @apply bg-white/10 backdrop-blur-sm border border-white/20;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded hover:bg-gray-500;
+}
+
+/* Responsive design improvements */
+@media (max-width: 640px) {
   .card {
-    @apply bg-white rounded-lg shadow-lg border-2 border-gray-200 p-4 text-center;
-    width: 80px;
-    height: 120px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    @apply w-12 text-lg;
+    height: 4.5rem;
+    min-width: 3rem;
+    min-height: 4.5rem;
   }
   
-  .card-red {
-    @apply text-poker-red;
+  .suit-button {
+    @apply w-16 h-16 text-3xl;
   }
   
-  .card-black {
-    @apply text-poker-black;
-  }
-  
-  .card-suit {
-    @apply text-2xl font-bold;
-  }
-  
-  .card-number {
-    @apply text-lg font-bold;
+  .value-button {
+    @apply w-10 h-10 text-base;
   }
   
   .poker-button {
-    @apply bg-poker-gold hover:bg-yellow-400 text-poker-black font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+    @apply text-sm px-4 py-2;
   }
   
-  .poker-button-red {
-    @apply bg-poker-red hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+  .poker-button-red, .poker-button-black {
+    @apply text-sm px-4 py-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    @apply w-10 text-sm;
+    height: 3.5rem;
+    min-width: 2.5rem;
+    min-height: 3.5rem;
   }
   
-  .poker-button-black {
-    @apply bg-poker-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105;
+  .suit-button {
+    @apply w-12 h-12 text-2xl;
+  }
+  
+  .value-button {
+    @apply w-8 h-8 text-sm;
+  }
+  
+  .value-grid {
+    @apply grid-cols-3 gap-2;
   }
 }

@@ -6,11 +6,12 @@ import { getSuitSymbol, CARD_VALUES } from '@/utils/cardUtils'
 interface ValueSelectionProps {
   suit: Suit
   color: CardColor
+  cardNumber: number
   onValueSelect: (value: CardValue) => void
   onBack: () => void
 }
 
-export default function ValueSelection({ suit, color, onValueSelect, onBack }: ValueSelectionProps) {
+export default function ValueSelection({ suit, color, cardNumber, onValueSelect, onBack }: ValueSelectionProps) {
   return (
     <div className="text-center">
       <h2 className="text-3xl font-bold text-white mb-8">
@@ -46,7 +47,7 @@ export default function ValueSelection({ suit, color, onValueSelect, onBack }: V
         </button>
       </div>
       <p className="text-green-100 mt-4 text-lg">
-        Choose the value for your {1}st hole card
+        Choose the value for your {cardNumber}{cardNumber === 1 ? 'st' : cardNumber === 2 ? 'nd' : cardNumber === 3 ? 'rd' : 'th'} hole card
       </p>
     </div>
   )

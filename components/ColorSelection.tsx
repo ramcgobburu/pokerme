@@ -25,7 +25,7 @@ export default function ColorSelection({ onColorSelect }: ColorSelectionProps) {
         </button>
       </div>
       <p className="text-green-100 mt-6 text-lg">
-        Choose the color for your {1}st hole card
+        Choose your preferred color theme
       </p>
     </div>
   )

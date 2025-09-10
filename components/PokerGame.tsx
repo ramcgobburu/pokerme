@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { GameState, CardColor, Suit, CardValue, Card } from '@/types/poker'
+import { isCardDuplicate } from '@/utils/cardUtils'
+import { useToast } from './ToastProvider'
 import ColorSelection from './ColorSelection'
 import SuitSelection from './SuitSelection'
 import ValueSelection from './ValueSelection'
@@ -21,6 +23,7 @@ const initialGameState: GameState = {
 
 export default function PokerGame() {
   const [gameState, setGameState] = useState<GameState>(initialGameState)
+  const { showToast } = useToast()
 
   const handleColorSelect = (color: CardColor) => {
     setGameState(prev => ({
@@ -43,6 +46,13 @@ export default function PokerGame() {
       suit: gameState.selectedSuit!,
       value,
       color: gameState.selectedColor!
+    }
+
+    // Check for duplicate cards
+    const allExistingCards = [...gameState.holeCards, ...gameState.communityCards]
+    if (isCardDuplicate(newCard, allExistingCards)) {
+      showToast('This card has already been selected. Please choose a different card.', 'warning')
+      return
     }
 
     const newHoleCards = [...gameState.holeCards, newCard]
@@ -99,6 +109,7 @@ export default function PokerGame() {
           <ValueSelection 
             suit={gameState.selectedSuit!}
             color={gameState.selectedColor!}
+            cardNumber={gameState.holeCards.length + 1}
             onValueSelect={handleValueSelect}
             onBack={() => setGameState(prev => ({ ...prev, phase: 'suit-selection', selectedSuit: null }))}
           />
@@ -130,14 +141,26 @@ export default function PokerGame() {
             phase={gameState.phase}
             holeCards={gameState.holeCards}
             communityCards={gameState.communityCards}
-            onCardAdd={(card) => setGameState(prev => ({
-              ...prev,
-              communityCards: [...prev.communityCards, card],
-              phase: prev.phase === 'flop' && prev.communityCards.length === 2 ? 'turn' :
-                    prev.phase === 'turn' && prev.communityCards.length === 3 ? 'river' :
-                    prev.phase === 'river' && prev.communityCards.length === 4 ? 'analysis' : prev.phase
-            }))}
-            onNextPhase={handleNextPhase}
+            onCardAdd={(card) => setGameState(prev => {
+              const newCommunityCards = [...prev.communityCards, card]
+              let newPhase = prev.phase
+              
+              // Correct poker flow logic
+              if (prev.phase === 'flop' && newCommunityCards.length === 3) {
+                newPhase = 'turn'
+              } else if (prev.phase === 'turn' && newCommunityCards.length === 4) {
+                newPhase = 'river'
+              } else if (prev.phase === 'river' && newCommunityCards.length === 5) {
+                newPhase = 'analysis'
+              }
+              
+              return {
+                ...prev,
+                communityCards: newCommunityCards,
+                phase: newPhase
+              }
+            })}
+            onNextPhase={() => {}} // Disabled - phases transition automatically
             onReset={handleReset}
           />
         )

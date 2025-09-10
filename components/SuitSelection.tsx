@@ -10,21 +10,19 @@ interface SuitSelectionProps {
 }
 
 export default function SuitSelection({ color, onSuitSelect, onBack }: SuitSelectionProps) {
-  const availableSuits = getCardsByColor(color)
+  const allSuits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades']
 
   return (
     <div className="text-center">
       <h2 className="text-3xl font-bold text-white mb-8">
-        Select {color.toUpperCase()} Suit
+        Select Suit
       </h2>
       <div className="flex justify-center gap-6 mb-6">
-        {availableSuits.map((suit) => (
+        {allSuits.map((suit) => (
           <button
             key={suit}
             onClick={() => onSuitSelect(suit)}
-            className={`poker-button text-4xl px-8 py-6 ${
-              color === 'red' ? 'poker-button-red' : 'poker-button-black'
-            }`}
+            className={`suit-button ${color}`}
           >
             {getSuitSymbol(suit)}
           </button>
@@ -39,7 +37,7 @@ export default function SuitSelection({ color, onSuitSelect, onBack }: SuitSelec
         </button>
       </div>
       <p className="text-green-100 mt-4 text-lg">
-        Choose the suit for your {1}st hole card
+        Choose the suit for your hole card
       </p>
     </div>
   )

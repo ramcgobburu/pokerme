@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/types/poker'
 import CardDisplay from './CardDisplay'
+import { analyzeHandAction } from '@/app/actions/analyze-hand'
 
 interface AnalysisDisplayProps {
   holeCards: Card[]
@@ -21,26 +22,33 @@ interface HandAnalysis {
 export default function AnalysisDisplay({ holeCards, communityCards, onReset }: AnalysisDisplayProps) {
   const [analysis, setAnalysis] = useState<HandAnalysis | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Simulate API call to LLM
     const analyzeHand = async () => {
       setLoading(true)
+      setError(null)
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Mock analysis - in real app, this would call your LLM API
-      const mockAnalysis: HandAnalysis = {
-        handStrength: "Pair of Kings with Ace kicker",
-        recommendation: "raise",
-        confidence: 85,
-        reasoning: "You have a strong pair with a high kicker. The community cards show potential for a flush draw, but your pair is still strong. Consider raising to build the pot while you're ahead.",
-        winProbability: 72
+      try {
+        // Validate that we have enough cards for analysis
+        if (holeCards.length < 2) {
+          setError('Please select at least 2 hole cards before analysis')
+          return
+        }
+        
+        const result = await analyzeHandAction(holeCards, communityCards)
+        
+        if (result.success && result.analysis) {
+          setAnalysis(result.analysis)
+        } else {
+          setError(result.error || 'Failed to analyze hand. Please try again.')
+        }
+      } catch (err) {
+        console.error('Error analyzing hand:', err)
+        setError('An unexpected error occurred. Please check your internet connection and try again.')
+      } finally {
+        setLoading(false)
       }
-      
-      setAnalysis(mockAnalysis)
-      setLoading(false)
     }
 
     analyzeHand()
@@ -134,6 +142,16 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
               </p>
             </div>
           </div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-500/20 rounded-lg p-8 mb-8">
+          <p className="text-red-200 text-lg mb-4">Failed to analyze hand: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            Try Again
+          </button>
         </div>
       ) : (
         <div className="bg-red-500/20 rounded-lg p-8 mb-8">
