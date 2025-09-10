@@ -26,31 +26,41 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
 
   useEffect(() => {
     const analyzeHand = async () => {
+      console.log('🎯 [CLIENT] Starting hand analysis...')
+      console.log('📊 [CLIENT] Hole Cards:', holeCards)
+      console.log('📊 [CLIENT] Community Cards:', communityCards)
+      
       setLoading(true)
       setError(null)
       
       try {
         // Validate that we have enough cards for analysis
         if (holeCards.length < 2) {
+          console.log('❌ [CLIENT] Not enough hole cards')
           setError('Please select at least 2 hole cards before analysis')
           return
         }
         
+        console.log('🚀 [CLIENT] Calling analyzeHandAction...')
         const result = await analyzeHandAction(holeCards, communityCards)
+        console.log('📄 [CLIENT] Received result:', result)
         
         if (result.success) {
+          console.log('✅ [CLIENT] Analysis successful, setting analysis data')
           // Type guard: if success is true, result must have analysis property
           const successResult = result as { success: true; analysis: HandAnalysis }
           setAnalysis(successResult.analysis)
         } else {
+          console.log('❌ [CLIENT] Analysis failed:', result)
           // Type guard: if success is false, result must have error property
           const errorResult = result as { success: false; error: string }
           setError(errorResult.error || 'Failed to analyze hand. Please try again.')
         }
       } catch (err) {
-        console.error('Error analyzing hand:', err)
+        console.error('❌ [CLIENT] Error analyzing hand:', err)
         setError('An unexpected error occurred. Please check your internet connection and try again.')
       } finally {
+        console.log('🏁 [CLIENT] Analysis complete, setting loading to false')
         setLoading(false)
       }
     }
