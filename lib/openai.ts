@@ -64,7 +64,17 @@ Format your response as JSON:
     }
 
     console.log('🔄 Parsing JSON response...')
-    const parsedResponse = JSON.parse(response)
+    
+    // Clean the response by removing markdown code blocks if present
+    let cleanResponse = response.trim()
+    if (cleanResponse.startsWith('```json')) {
+      cleanResponse = cleanResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+    } else if (cleanResponse.startsWith('```')) {
+      cleanResponse = cleanResponse.replace(/^```\s*/, '').replace(/\s*```$/, '')
+    }
+    
+    console.log('🧹 Cleaned response:', cleanResponse)
+    const parsedResponse = JSON.parse(cleanResponse)
     console.log('✅ Successfully parsed AI response:', parsedResponse)
     
     return parsedResponse
