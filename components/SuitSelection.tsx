@@ -10,7 +10,16 @@ interface SuitSelectionProps {
 }
 
 export default function SuitSelection({ color, onSuitSelect, onBack }: SuitSelectionProps) {
-  const allSuits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades']
+  // Filter suits based on selected color
+  const getSuitsByColor = (selectedColor: CardColor): Suit[] => {
+    if (selectedColor === 'red') {
+      return ['hearts', 'diamonds'] // Only red suits
+    } else {
+      return ['clubs', 'spades'] // Only black suits
+    }
+  }
+
+  const availableSuits = getSuitsByColor(color)
 
   return (
     <div className="text-center">
@@ -18,7 +27,7 @@ export default function SuitSelection({ color, onSuitSelect, onBack }: SuitSelec
         Select Suit
       </h2>
       <div className="flex justify-center gap-6 mb-6">
-        {allSuits.map((suit) => (
+        {availableSuits.map((suit) => (
           <button
             key={suit}
             onClick={() => onSuitSelect(suit)}
@@ -37,7 +46,7 @@ export default function SuitSelection({ color, onSuitSelect, onBack }: SuitSelec
         </button>
       </div>
       <p className="text-green-100 mt-4 text-lg">
-        Choose the suit for your hole card
+        Choose the {color} suit for your hole card
       </p>
     </div>
   )
