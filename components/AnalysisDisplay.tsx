@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/types/poker'
 import CardDisplay from './CardDisplay'
-import { analyzeHandAction } from '@/app/actions/analyze-hand'
+import { analyzeHandAction, analyzePreFlopAction, analyzeFlopAction, analyzeTurnAction, analyzeRiverAction } from '@/app/actions/analyze-hand'
 
 interface AnalysisDisplayProps {
   holeCards: Card[]
@@ -13,10 +13,11 @@ interface AnalysisDisplayProps {
 
 interface HandAnalysis {
   handStrength: string
-  recommendation: 'fold' | 'call' | 'raise' | 'all-in'
+  recommendation: 'fold' | 'call' | 'raise' | 'all-in' | '3-bet' | '4-bet' | 'check-raise' | 'check-call' | 'value-bet' | 'bluff'
   confidence: number
   reasoning: string
   winProbability: number
+  stage?: 'pre-flop' | 'flop' | 'turn' | 'river'
 }
 
 export default function AnalysisDisplay({ holeCards, communityCards, onReset }: AnalysisDisplayProps) {
@@ -26,7 +27,7 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
 
   useEffect(() => {
     const analyzeHand = async () => {
-      console.log('🎯 [CLIENT] Starting hand analysis...')
+      console.log('🎯 [CLIENT] Starting progressive hand analysis...')
       console.log('📊 [CLIENT] Hole Cards:', holeCards)
       console.log('📊 [CLIENT] Community Cards:', communityCards)
       
@@ -41,8 +42,26 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
           return
         }
         
-        console.log('🚀 [CLIENT] Calling analyzeHandAction...')
-        const result = await analyzeHandAction(holeCards, communityCards)
+        let result
+        
+        // Choose the appropriate analysis function based on the number of community cards
+        if (communityCards.length === 0) {
+          console.log('🚀 [CLIENT] Calling pre-flop analysis...')
+          result = await analyzePreFlopAction(holeCards)
+        } else if (communityCards.length === 3) {
+          console.log('🚀 [CLIENT] Calling flop analysis...')
+          result = await analyzeFlopAction(holeCards, communityCards)
+        } else if (communityCards.length === 4) {
+          console.log('🚀 [CLIENT] Calling turn analysis...')
+          result = await analyzeTurnAction(holeCards, communityCards)
+        } else if (communityCards.length === 5) {
+          console.log('🚀 [CLIENT] Calling river analysis...')
+          result = await analyzeRiverAction(holeCards, communityCards)
+        } else {
+          console.log('🚀 [CLIENT] Calling legacy analysis...')
+          result = await analyzeHandAction(holeCards, communityCards)
+        }
+        
         console.log('📄 [CLIENT] Received result:', result)
         
         if (result.success) {
@@ -71,9 +90,15 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
   const getRecommendationColor = (recommendation: string) => {
     switch (recommendation) {
       case 'fold': return 'text-red-500'
-      case 'call': return 'text-yellow-500'
-      case 'raise': return 'text-green-500'
+      case 'call': 
+      case 'check-call': return 'text-yellow-500'
+      case 'raise': 
+      case 'check-raise':
+      case 'value-bet': return 'text-green-500'
       case 'all-in': return 'text-purple-500'
+      case '3-bet':
+      case '4-bet': return 'text-blue-500'
+      case 'bluff': return 'text-orange-500'
       default: return 'text-gray-500'
     }
   }
@@ -81,9 +106,15 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
   const getRecommendationIcon = (recommendation: string) => {
     switch (recommendation) {
       case 'fold': return '❌'
-      case 'call': return '✅'
-      case 'raise': return '📈'
+      case 'call': 
+      case 'check-call': return '✅'
+      case 'raise': 
+      case 'check-raise':
+      case 'value-bet': return '📈'
       case 'all-in': return '🚀'
+      case '3-bet':
+      case '4-bet': return '⚡'
+      case 'bluff': return '🎭'
       default: return '❓'
     }
   }
@@ -117,6 +148,14 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
         </div>
       ) : analysis ? (
         <div className="bg-white/10 rounded-lg p-8 mb-8 text-left">
+          {/* Stage Indicator */}
+          {analysis.stage && (
+            <div className="mb-4">
+              <span className="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold uppercase">
+                {analysis.stage.replace('-', ' ')} Analysis
+              </span>
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h4 className="text-xl font-bold text-white mb-4">Hand Strength</h4>
