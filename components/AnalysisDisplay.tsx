@@ -9,6 +9,9 @@ interface AnalysisDisplayProps {
   holeCards: Card[]
   communityCards: Card[]
   onReset: () => void
+  onContinue?: () => void
+  showContinueButton?: boolean
+  continueButtonText?: string
 }
 
 interface HandAnalysis {
@@ -20,7 +23,14 @@ interface HandAnalysis {
   stage?: 'pre-flop' | 'flop' | 'turn' | 'river'
 }
 
-export default function AnalysisDisplay({ holeCards, communityCards, onReset }: AnalysisDisplayProps) {
+export default function AnalysisDisplay({ 
+  holeCards, 
+  communityCards, 
+  onReset, 
+  onContinue, 
+  showContinueButton = false, 
+  continueButtonText = "Continue" 
+}: AnalysisDisplayProps) {
   const [analysis, setAnalysis] = useState<HandAnalysis | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -220,7 +230,15 @@ export default function AnalysisDisplay({ holeCards, communityCards, onReset }: 
         >
           New Game
         </button>
-        {analysis && (
+        {showContinueButton && onContinue && (
+          <button 
+            onClick={onContinue}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg"
+          >
+            {continueButtonText}
+          </button>
+        )}
+        {analysis && !showContinueButton && (
           <button 
             onClick={() => window.location.reload()}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg"

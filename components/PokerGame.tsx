@@ -117,20 +117,14 @@ export default function PokerGame() {
       
       case 'hole-cards-complete':
         return (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Your Hole Cards</h2>
-            <div className="flex justify-center gap-4 mb-6">
-              {gameState.holeCards.map((card, index) => (
-                <CardDisplay key={index} card={card} />
-              ))}
-            </div>
-            <button 
-              onClick={handleNextPhase}
-              className="poker-button"
-            >
-              Continue to Flop
-            </button>
-          </div>
+          <AnalysisDisplay 
+            holeCards={gameState.holeCards}
+            communityCards={[]}
+            onReset={handleReset}
+            onContinue={() => setGameState(prev => ({ ...prev, phase: 'flop' }))}
+            showContinueButton={true}
+            continueButtonText="Continue to Flop"
+          />
         )
       
       case 'flop':
@@ -145,13 +139,13 @@ export default function PokerGame() {
               const newCommunityCards = [...prev.communityCards, card]
               let newPhase = prev.phase
               
-              // Correct poker flow logic
+              // Correct poker flow logic - show analysis after each stage
               if (prev.phase === 'flop' && newCommunityCards.length === 3) {
-                newPhase = 'turn'
+                newPhase = 'flop-analysis'
               } else if (prev.phase === 'turn' && newCommunityCards.length === 4) {
-                newPhase = 'river'
+                newPhase = 'turn-analysis'
               } else if (prev.phase === 'river' && newCommunityCards.length === 5) {
-                newPhase = 'analysis'
+                newPhase = 'river-analysis'
               }
               
               return {
@@ -162,6 +156,40 @@ export default function PokerGame() {
             })}
             onNextPhase={() => {}} // Disabled - phases transition automatically
             onReset={handleReset}
+          />
+        )
+      
+      case 'flop-analysis':
+        return (
+          <AnalysisDisplay 
+            holeCards={gameState.holeCards}
+            communityCards={gameState.communityCards}
+            onReset={handleReset}
+            onContinue={() => setGameState(prev => ({ ...prev, phase: 'turn' }))}
+            showContinueButton={true}
+            continueButtonText="Continue to Turn"
+          />
+        )
+      
+      case 'turn-analysis':
+        return (
+          <AnalysisDisplay 
+            holeCards={gameState.holeCards}
+            communityCards={gameState.communityCards}
+            onReset={handleReset}
+            onContinue={() => setGameState(prev => ({ ...prev, phase: 'river' }))}
+            showContinueButton={true}
+            continueButtonText="Continue to River"
+          />
+        )
+      
+      case 'river-analysis':
+        return (
+          <AnalysisDisplay 
+            holeCards={gameState.holeCards}
+            communityCards={gameState.communityCards}
+            onReset={handleReset}
+            showContinueButton={false}
           />
         )
       

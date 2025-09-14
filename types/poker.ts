@@ -17,7 +17,7 @@ export interface PokerHand {
   reasoning: string
 }
 
-export type GamePhase = 'color-selection' | 'suit-selection' | 'value-selection' | 'hole-cards-complete' | 'flop' | 'turn' | 'river' | 'analysis'
+export type GamePhase = 'color-selection' | 'suit-selection' | 'value-selection' | 'hole-cards-complete' | 'flop' | 'turn' | 'river' | 'flop-analysis' | 'turn-analysis' | 'river-analysis' | 'analysis'
 
 export interface GameState {
   phase: GamePhase
